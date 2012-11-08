@@ -20,9 +20,11 @@ Steps to success
  2. Get yourself a server with Node.js installed, and a webserver like apache or nginx
 
  3. You'll also need to install a couple of Node.js modules for kafka and websocket support
+
         npm install kafka
         npm install websocket
-    We found that on a current build of Node.js, it would throw errors relating to the `pick` module. Commenting the offending line in `node_modules/kafka/node_modules/std/std.js` seems to fix that up.
+
+    We found that on a current build of Node.js, it would throw errors relating to the `pick` module. Commenting out the offending line in `node_modules/kafka/node_modules/std/std.js` seems to fix that up.
 
  4. Edit server.js and fill in your `kafkahost` and `kafkaport`. Adjust the `listenport` as well if you want
 
