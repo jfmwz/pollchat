@@ -1,0 +1,100 @@
+<html><head><title>pollchat demo</title>
+<!--
+	A very ugly webpage to talk websockets to the Node.js pollchat-server
+	- David Basden <davidb@anchor.net.au>
+-->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+
+<script>
+	var nicks = ["crumble", "vitalizing", "Uniroyal", "deans", "Mia", "refiles", "cowpoke", "Jennie", "toxicologist", "garden", "banging", "allotted", "cod", "ampersands", "fiberglass", "King", "inculpates", "ulcerate", "exposed", "feedback", "Liz", "cilantro", "Münchhausen", "mowers", "chary", "Mesolithic", "Renee", "variability", "bronze", "bloodying", "Reinaldo", "homogenizing", "contaminant", "advocated", "tanks", "faints", "sew", "impairment", "bylaw", "gaze", "smoothly", "raider", "locker", "overpower", "riser", "prioritizing", "clattering", "assuaging", "nightingale", "clump", "elliptically", "clutters", "accumulative", "Tintoretto", "feasible", "Rio", "Schuyler", "licence", "motivational", "unsnaps", "commandeered", "decried", "Lille", "traumatizing", "rotogravure", "underacts", "commodores", "Cardin", "Angel", "alias", "expediter", "Michelin", "razzing", "strip", "Jasper", "flaws", "polygraphing", "ahoy", "stoically", "breathless", "horrid", "hod", "Congress", "calumniating", "persecutor", "Manilla", "dancing", "oinks", "uncommonly", "explications", "inheritance", "mammon", "aides", "claimed", "militiamen", "carbonate", "mote", "intended", "aphid", "cumquat"];
+	var conn;
+	var lastnick;
+
+	function ln(data) { cw = $('#chatwindow')[0];
+		$('<pre>', { 'html': data }).appendTo('#chatwindow');
+		cw.lastElementChild.scrollIntoView()
+	}
+
+	function getNick() { return $('#nickbox')[0].value; }
+
+	function sendmsg(msg) {
+		tosend = JSON.stringify({ 'type': 'msg', 'nick': getNick(), 'data': msg});
+		//ln("sending: "+tosend);
+		conn.send(tosend);
+	}
+
+	var dest = "ws://pollchat.example.com:31337";
+	var conn;
+	var ws_open,ws_error,ws_close,ws_message;
+	var reconnect_in = 5;
+	var timerid;
+
+	window.WebSocket = window.WebSocket || window.MozWebSocket;
+
+	if (!window.WebSocket) { ln("Sorry. Browser doesn't support WebSockets :-("); return; }
+
+	wsconnect = function() {
+		if (timerid) { window.clearInterval(timerid); timerid = undefined; }
+		if (conn) {
+			ln("Already have an open connection");
+			return;
+		}
+		conn = new WebSocket(dest);
+		conn.onopen = ws_open;
+		conn.onclose = ws_close;
+		conn.onerror = ws_error;
+		conn.onmessage = ws_message;
+		return false;
+	}
+	ws_open = function () {
+		ln("Connected to "+dest);
+		conn.send(JSON.stringify({'type': 'join', 'nick': getNick()})) }
+	ws_error = function(error) { ln("websocketerror: "+error);}
+	ws_close = function(c) {
+		ln(c);
+		conn = undefined;
+		ln("connection closed. Reconnecting in "+reconnect_in+" seconds.");
+		timerid = window.setInterval(function() {
+			reconnect_in *= 2;
+			wsconnect();
+		}, reconnect_in * 1000);
+	}
+	ws_message = function(msg) {
+		try { var jsdata = JSON.parse(msg.data); } catch (e) { ln('!!! '+msg.data.toString()); return; }
+		if (jsdata.type == "msg") { ln('['+jsdata.nick+'] '+jsdata.data); }
+		else if (jsdata.type == "join") { ln(jsdata.nick+' joined' );  }
+		else { ln('!!! ('+jsdata.type+') '+msg.data.toString()); }
+	}
+
+	$(function() {
+		wsconnect();
+		$('#inpbox').change(function(e) {
+			t = e.currentTarget;
+			sendmsg(t.value);
+			t.value = "";
+		});
+		nick = window.location.hash;
+		if (nick == "") { nick = nicks[Math.floor(Math.random()*100)]; } else {  nick[0] = ' '; }
+
+		lastnick = nick;
+		$('#nickbox')[0].value = nick;
+	});
+</script>
+
+<style type="text/css">
+	#chatwindow { width: 100%; height: 80%; overflow:scroll; }
+	#nickbox { width: 10em; text-align: right }
+	#inpbox { width: 80%; }
+</style>
+</head>
+
+<body>
+
+<h1>kafka.example.com</h1>
+
+<div id="chatwindow"></div>
+<div>
+[<input id="nickbox">] <input id="inpbox">
+</div>
+
+</body></html>
