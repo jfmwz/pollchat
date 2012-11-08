@@ -19,10 +19,14 @@ Steps to success
 
  2. Get yourself a server with Node.js installed, and a webserver like apache or nginx
 
- 3. Edit server.js and fill in your `kafkahost` and `kafkaport`. Adjust the `listenport` as well if you want
+ 3. You'll also need to install a couple of Node.js modules for kafka and websocket support
+        npm install kafka
+        npm install websocket
 
- 4. Now fire up the server.js daemon, something like daemontools is recommended for serious usage
+ 4. Edit server.js and fill in your `kafkahost` and `kafkaport`. Adjust the `listenport` as well if you want
 
- 5. Edit index.html and fill in the Node.js websocket listener details. Place it in a directory being served by apache/nginx/other
+ 5. Now fire up the server.js daemon, something like daemontools is recommended for serious usage
 
- 6. Hit the page from your browser, you've just started a chat client!
+ 6. Edit index.html and fill in the Node.js websocket listener details. Place it in a directory being served by apache/nginx/other
+
+ 7. Hit the page from your browser, you've just started a chat client!
